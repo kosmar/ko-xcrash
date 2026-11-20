@@ -1,0 +1,24 @@
+# KO FUNK host simulation — GENRE_FUNK / fm_app.c
+# cc -O2 -Wall -Wno-unused-function -DDINGHY_HOST -DGENRE_FUNK -Ifirmware/src -Ifirmware/gen -o build/host/funk firmware/src/fm_app.c
+
+50 btn 12
+200 keys 0x1
+280 keys 0
+500 keys 0x1000
+580 keys 0
+700 btn 4
+900 keys 0x400
+980 keys 0
+1400 btn 2
+1800 btn 7
+2200 btn 5
+2600 btn 8
+3000 btn 3
+3400 btn 6
+3800 btn 9
+4200 btn 10
+4600 btn 11
+5000 btn 1
+5400 btn 0
+5800 btn 12
+6200 btn 12

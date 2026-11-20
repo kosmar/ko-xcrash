@@ -1,0 +1,17 @@
+# MIDI-First Host Simulation Script for Kosmar FM-1
+100 midi 0xFA 0 0
+120 midi 0xF8 0 0
+140 midi 0xF8 0 0
+160 midi 0xF8 0 0
+180 midi 0xF8 0 0
+200 midi 0xF8 0 0
+220 midi 0xF8 0 0
+250 keys 0x4880
+800 midi 0xB0 1 110
+1500 keys 0
+1700 midi 0x90 69 115
+2200 btn 3
+2600 midi 0xB0 16 96
+3200 midi 0x80 69 0
+3800 midi 0xFC 0 0
+4000 end

@@ -1,0 +1,7 @@
+# DJ on the endless plate continuum (any FM_PGEN genre): play, FX long press = DJ, let several phrases turn.
+# Trace n / compliance per transition: tests/pgen_dj_trace.sh <genre>
+50 press 12
+100 release 12
+300 press 2
+900 release 2
+240000 end

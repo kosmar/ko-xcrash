@@ -1,0 +1,11 @@
+# TRP2 roundtrip: LFO rate, SEQ steps, CONTURA scale in mode_mem
+300 encid 1 -1
+450 encid 6 10
+550 encid 1 -1
+700 btn 5
+800 enc 1 12
+850 btn 11
+900 btn 11
+950 encid 0 1
+1000 btn 9
+1400 end

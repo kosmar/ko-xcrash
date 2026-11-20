@@ -1,0 +1,3 @@
+# Press SAVE (BTN 9) at 500 ms — migration / TRP1 roundtrip
+500 btn 9
+600 end

@@ -1,0 +1,14 @@
+# KO BASS host smoke — HOME sound + ENV/BASS banks
+# cc -O2 -DDINGHY_HOST -DGENRE_BASS -Ifirmware/src -Ifirmware/gen -o build/host/bass firmware/src/fm_app.c
+
+50 btn 12
+200 keys 0x1
+280 keys 0
+500 keys 0x1000
+580 keys 0
+700 btn 4
+1400 press 2
+1520 release 2
+2200 btn 7
+3000 btn 10
+4000 end

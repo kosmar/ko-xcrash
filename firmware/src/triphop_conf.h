@@ -1,0 +1,27 @@
+/* SPDX-License-Identifier: GPL-3.0-only */
+#ifndef TRIPHOP_CONF_H
+#define TRIPHOP_CONF_H
+
+#define GENRE_ERA_N      6u
+#define GENRE_PRESETS_PER_ERA 10u
+#define GENRE_PRESET_N   60u
+#define GENRE_CFG_USER_PLATE_N 60u
+#define GENRE_PRESET_N_LEGACY 48u
+#define GENRE_CFG_MAGIC  0x54525031u /* TRP1 */
+#define GENRE_APP_NAME   "KO TRIPHOP"
+#define GENRE_FELUCCA_ID "FM-1_56412"
+
+#define GENRE_PRESET_LABEL "TRACK"
+#define GENRE_PRESET_HDR   "TRK"
+
+#define GENRE_C_ACC RGB(210, 158, 108)
+
+#define GENRE_BANK_COL \
+    { RGB(150, 115, 82), RGB(220, 168, 92), RGB(175, 95, 72), RGB(115, 98, 125), \
+      RGB(95, 118, 128), RGB(130, 145, 95) }
+
+#define GENRE_ERA_COL \
+    { RGB(165, 120, 85), RGB(235, 175, 88), RGB(190, 88, 68), RGB(130, 105, 140), \
+      RGB(88, 112, 122), RGB(118, 138, 92) }
+
+#endif

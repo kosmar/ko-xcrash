@@ -1,0 +1,25 @@
+# KO POP host simulation — FM-1_56407; 60 track presets
+# cc -O2 -Wall -Wno-unused-function -DDINGHY_HOST -DGENRE_POP -Ifirmware/src -Ifirmware/gen -o build/host/pop firmware/src/fm_app.c
+
+50 btn 12
+200 keys 0x1
+280 keys 0
+500 keys 0x1000
+580 keys 0
+700 btn 4
+900 keys 0x400
+980 keys 0
+1400 btn 2
+1800 btn 7
+2200 btn 5
+2600 btn 8
+3000 btn 11
+3400 keys 0x1
+3480 keys 0
+4000 btn 10
+4400 btn 6
+5000 keys 0x2000000
+5080 keys 0
+5200 keys 0
+5600 btn 13
+6000 end

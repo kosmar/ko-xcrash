@@ -1,0 +1,7 @@
+# Manual: ch 5 must not change mode (PC) or perf CC while ch 1 does — default midi_ch=OMNI accepts all.
+# Run: build/triptych_check/dinghy OUT tests/triptych_midi_ch5_test.txt
+0 keys 0
+100 midi 192 0 0
+150 midi 180 31 2
+200 midi 176 31 1
+250 end

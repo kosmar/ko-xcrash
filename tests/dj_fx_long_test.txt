@@ -1,0 +1,5 @@
+# FX longpress >= 500 ms toggles DJ; release must not bank-switch (BTN_FX = 2).
+# Guard: tests/check_dj_wired.sh — do not git checkout fm_app.c without DJ glue.
+0 press 2
+600 release 2
+900 end

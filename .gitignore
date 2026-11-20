@@ -1,0 +1,11 @@
+build/
+web/pages/screenshots/
+__pycache__/
+.DS_Store
+core
+core.*
+firmware/stock/
+
+vendor/
+.venv/
+tools/node_modules/

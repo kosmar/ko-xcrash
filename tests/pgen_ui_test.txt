@@ -1,0 +1,23 @@
+# Endless plates (any FM_PGEN genre): drift, EDIT+turn jump, EDIT+era compliance, era change keeps n
+# cc -O2 -Wall -Wno-unused-function -DDINGHY_HOST '-DAPP_VER="dev"' -DGENRE_HOUSE -Ifirmware/src -Ifirmware/gen -o build/host/house firmware/src/fm_app.c
+# build/host/house build/host/house_pg tests/pgen_ui_test.txt
+50 btn 12
+300 shot
+600 encid 6 1
+900 shot
+1000 encid 6 1
+1100 encid 6 1
+1200 shot
+1400 press 6
+1500 encid 6 1
+1700 release 6
+1800 shot
+2000 press 6
+2100 encid 1 -8
+2300 release 6
+2400 shot
+2600 encid 1 1
+2900 shot
+3200 encid 6 -3
+3500 shot
+4000 end

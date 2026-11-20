@@ -1,0 +1,2 @@
+# Boot-only reload after HOST_STORE_IN points at a TRP1 save file
+100 end

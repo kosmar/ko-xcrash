@@ -1,0 +1,20 @@
+# DUB SEQ — selected lane K muted + vary visible
+# PLAY=12 SEQ=11 EDIT=6
+
+50 btn 12
+3000 press 11
+3040 release 11
+3080 press 11
+3120 release 11
+3160 press 11
+3200 release 11
+3220 enc 1 -40
+3240 enc 1 -40
+3260 enc 1 -40
+3280 press 11
+3320 release 11
+3340 enc 3 20
+3360 enc 3 20
+3380 enc 3 20
+3500 shot
+3600 end

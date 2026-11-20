@@ -1,0 +1,31 @@
+# KO JET: live record (REC armed + PLAY), loop playback, autosave. Plate tempo 98 BPM: a 16th is 153 ms,
+# a bar 2449 ms. Keys: bit k = MIDI 53 + k (bit 7 = C4). Buttons: 11 SEQ, 12 PLAY, 13 REC.
+
+# SEQ view, CLEAR the factory riff
+0 btn 11
+100 enc 3 1
+300 enc 3 1
+
+# REC, then PLAY at 700: bar starts at 700, 3149, 5598
+500 btn 13
+700 btn 12
+
+# C4, short, on step 3 (1006 ms)
+1016 keys 0x80
+1090 keys 0
+# E4 played late in step 6 (1465 ms + 4.5 ticks): 16TH quantise puts it on step 7
+1585 keys 0x800
+1660 keys 0
+# G4 held from step 10 across steps 11 and 12 (one tied note, no re-attack)
+2085 keys 0x4000
+2515 keys 0
+2900 shot
+
+# second bar: the loop plays what was recorded
+4600 shot
+
+# stop, REC off; the pattern is saved once the voice is quiet
+5500 btn 12
+5600 btn 13
+5700 shot
+10500 end

@@ -1,0 +1,46 @@
+# KO JET: one screenshot per bank page (17). Buttons: 8 HOME, 3 SEL, 4 ENV, 7 GLO, 2 FX, 5 LFO.
+# A bank button opens its bank; pressing it again steps to the next page.
+
+100 keys 0x80
+# HOME
+200 btn 8
+350 shot
+500 btn 8
+650 shot
+800 btn 8
+950 shot
+1100 btn 8
+1250 shot
+# SEL
+1400 btn 3
+1550 shot
+1700 btn 3
+1850 shot
+2000 btn 3
+2150 shot
+# ENV
+2300 btn 4
+2450 shot
+2600 btn 4
+2750 shot
+# GLO
+2900 btn 7
+3050 shot
+3200 btn 7
+3350 shot
+# FX
+3500 btn 2
+3650 shot
+3800 btn 2
+3950 shot
+4100 btn 2
+4250 shot
+# LFO
+4400 btn 5
+4550 shot
+4700 btn 5
+4850 shot
+5000 btn 5
+5150 shot
+5300 keys 0
+5600 end

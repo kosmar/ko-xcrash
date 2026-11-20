@@ -1,0 +1,4 @@
+# TEMPO CC 20 = 60 → 120 BPM (plan S1); no keys, ~30s
+0 midi 176 20 60
+100 btn 12
+30000 end

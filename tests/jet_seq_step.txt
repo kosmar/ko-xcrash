@@ -1,0 +1,37 @@
+# KO JET: factory riff plays, CLEAR, step record (REC armed, stopped), playback.
+# 120 BPM: a 16th is 125 ms. Keys: bit k = MIDI 53 + k (bit 7 = C4). Buttons: 11 SEQ, 12 PLAY, 13 REC.
+
+# fresh device: PLAY must be heard (factory riff C4 . . C4 . . D#4 . G4 . C5 . A#4 . G4 .)
+100 btn 12
+2090 btn 12
+
+# SEQ view, knob 4 = CLEAR (turn twice)
+2300 btn 11
+2400 enc 3 1
+2600 enc 3 1
+2800 shot
+
+# empty pattern: PLAY stays silent and says EMPTY
+3000 btn 12
+3300 shot
+3900 btn 12
+
+# REC while stopped = step record: every key lands on the cursor step, the cursor moves on
+4000 btn 13
+4200 keys 0x80
+4300 keys 0
+4400 keys 0x800
+4500 keys 0
+# SELECT walks the cursor: step 3 stays a rest
+4600 encid 0 1
+4700 keys 0x4000
+4800 keys 0
+4900 shot
+5000 btn 13
+5100 shot
+
+# wait for the tails, then play it back: C4 E4 - G4, then silence to the end of the bar
+7000 btn 12
+7300 shot
+11100 btn 12
+11400 end

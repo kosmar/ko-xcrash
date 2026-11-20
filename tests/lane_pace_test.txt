@@ -1,0 +1,26 @@
+# KO DUB per-lane PACE check: lane 1 = 1/32, lane 2 = 1/2, lanes 0 and 3..5 = 1/16.
+# Screenshots: 1000 (lane 1 selected, NUDGE page), 2000 (lane 2 selected, NUDGE page).
+50 btn 12
+150 btn 11
+250 press 6
+300 enc 0 -1
+350 release 6
+450 enc 0 1
+550 btn 11
+650 btn 11
+750 btn 11
+850 press 6
+900 enc 3 -1
+950 release 6
+1000 shot
+1100 btn 11
+1200 btn 11
+1300 enc 0 1
+1400 btn 11
+1500 btn 11
+1600 btn 11
+1700 press 6
+1750 enc 3 1
+1800 release 6
+2000 shot
+16000 end

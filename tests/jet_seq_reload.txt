@@ -1,0 +1,6 @@
+# KO JET: second boot from the settings jet_seq_live.txt saved (HOST_STORE_IN): PLAY brings the recorded bar back.
+100 btn 11
+300 shot
+1000 btn 12
+3300 btn 12
+3600 end

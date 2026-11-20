@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TRIPTYCH — M-VAVE FM-1 in the browser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700&family=Barlow+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root { --ground: #f4f5f6; --ink: #1c1f23; --muted: #5b626a; --rule: #d9dde1; --accent: #c8700a; --card: #fff; color-scheme: light; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --ground: #131518; --ink: #e6e8eb; --muted: #9aa1a9; --rule: #2d3137; --accent: #f0a043; --card: #1a1d21; color-scheme: dark; }
+}
+body { background: var(--ground); color: var(--ink); margin: 0; padding-inline: 16px; padding-block: 28px 48px;
+  font: 400 16px/1.55 "Barlow", "Helvetica Neue", Arial, sans-serif; }
+main { max-width: 1040px; margin: 0 auto; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: .4rem 1.2rem; margin: 0 0 1rem; }
+h1 { font: 700 2rem/1.1 "Barlow Semi Condensed", "Barlow", sans-serif; margin: 0; }
+header p { margin: 0; color: var(--muted); }
+.device { position: relative; width: 100%; aspect-ratio: 1000 / 640; user-select: none; -webkit-user-select: none;
+  -webkit-touch-callout: none; touch-action: manipulation; }
+.device svg { pointer-events: none; position: absolute; inset: 0; width: 100%; height: 100%; }
+.device #lcd { position: absolute; left: 31.8%; top: 9.6875%; width: 20%; height: 31.25%; image-rendering: pixelated;
+  background: #000; border-radius: 2px; }
+.hit { position: absolute; touch-action: none; cursor: pointer; -webkit-tap-highlight-color: transparent; border-radius: 12px; }
+.hit.knob { cursor: ns-resize; border-radius: 50%; }
+.hit:focus-visible { outline: 2px solid #f0a043; outline-offset: 2px; }
+.ctl.knob { cursor: ns-resize; }
+.btnface { transition: fill .06s; }
+.lit .btnface { fill: #f0a043; }
+.lit text.btn { fill: #1b1205; }
+.held .btnface, .held .keyface { stroke: #f0a043; stroke-width: 3; }
+.latched .btnface { stroke: #6fc3ff; stroke-width: 3; }
+.keyface { transition: fill .06s; }
+.lit .keyface.white { fill: #f3b25c; }
+.lit .keyface.black { fill: #e0902c; }
+.dim .keyface.white { fill: #f6dcb6; }
+.dim .keyface.black { fill: #7a5326; }
+.start { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(10, 11, 13, .55); border-radius: 4.4% / 6.9%; z-index: 2; }
+.start button { font: 600 1.25rem "Barlow Semi Condensed", "Barlow", sans-serif; letter-spacing: .04em; padding: .7em 1.6em;
+  border-radius: 999px; border: 0; background: #f0a043; color: #1b1205; cursor: pointer; }
+.start[hidden] { display: none; }
+.turn { display: none; margin: 0 0 .8rem; color: var(--muted); font-size: .92rem; }
+@media (orientation: portrait) and (max-width: 700px) { .turn { display: block; } }
+.start button:disabled { opacity: .6; cursor: progress; }
+.bar { display: flex; flex-wrap: wrap; gap: .5rem 1.2rem; align-items: center; margin: .9rem 0 0; color: var(--muted); font-size: .92rem; }
+.bar button { font: inherit; color: var(--ink); background: var(--card); border: 1px solid var(--rule); border-radius: 8px; padding: .3em .8em; cursor: pointer; }
+.bar .cpu { font-variant-numeric: tabular-nums; }
+.deck { margin: 1.8rem 0 0; }
+.deck h2 { font: 600 1.15rem "Barlow Semi Condensed", "Barlow", sans-serif; margin: 0 0 .6rem; }
+.deck > p { margin: 0 0 .8rem; color: var(--muted); max-width: 72ch; }
+.midi-row { display: flex; flex-wrap: wrap; gap: .6rem 1rem; align-items: center; margin-bottom: 1rem; }
+.midi-row label { color: var(--muted); font-size: .92rem; }
+.midi-row select { font: inherit; padding: .35em .6em; border-radius: 8px; border: 1px solid var(--rule); background: var(--card); color: var(--ink); min-width: 14rem; }
+.modes { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+.modes button { font: 600 .92rem "Barlow Semi Condensed", "Barlow", sans-serif; letter-spacing: .03em;
+  padding: .45em 1em; border-radius: 8px; border: 1px solid var(--rule); background: var(--card); color: var(--ink); cursor: pointer; }
+.modes button.on { background: var(--accent); border-color: var(--accent); color: #1b1205; }
+.fader-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: .75rem; }
+.fcard { border: 1px solid var(--rule); border-radius: 10px; background: var(--card); padding: .65rem .75rem .8rem; }
+.fcard h3 { font: 600 .95rem "Barlow Semi Condensed", "Barlow", sans-serif; margin: 0 0 .55rem; letter-spacing: .04em; }
+.fader { display: grid; grid-template-columns: 1fr auto; gap: .15rem .5rem; align-items: center; margin-bottom: .45rem; font-size: .85rem; }
+.fader label { color: var(--muted); }
+.fader .val { font-variant-numeric: tabular-nums; min-width: 2rem; text-align: right; }
+.fader input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: var(--accent); cursor: ns-resize; }
+.help { margin: 1.4rem 0 0; color: var(--muted); font-size: .92rem; max-width: 70ch; }
+kbd { font: 600 .85em ui-monospace, Menlo, monospace; background: var(--card); border: 1px solid var(--rule); border-radius: 4px; padding: 0 .3em; color: var(--ink); }
+.fw-bar { margin: 0 0 1.4rem; padding: .85rem 1rem; border: 1px solid var(--rule); border-radius: 12px; background: var(--card); }
+.fw-bar h2 { font: 600 1rem "Barlow Semi Condensed", "Barlow", sans-serif; margin: 0 0 .65rem; letter-spacing: .04em; }
+.fw-row { display: flex; flex-wrap: wrap; gap: .45rem .75rem; align-items: center; margin-bottom: .55rem; }
+.fw-row:last-child { margin-bottom: 0; }
+.fw-label { font: 600 .78rem "Barlow Semi Condensed", "Barlow", sans-serif; letter-spacing: .06em; color: var(--muted); min-width: 4.5rem; text-transform: uppercase; }
+.fw-id { font-size: .92rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.fw-id.muted { color: var(--muted); }
+.fw-flash { display: flex; flex-wrap: wrap; gap: .4rem; }
+.fw-flash button { font: 600 .82rem "Barlow Semi Condensed", "Barlow", sans-serif; letter-spacing: .03em;
+  padding: .35em .75em; border-radius: 8px; border: 1px solid var(--rule); background: var(--ground); color: var(--ink); cursor: pointer; }
+.fw-flash button:disabled { opacity: .38; cursor: not-allowed; }
+.fw-flash button.busy { opacity: .55; cursor: progress; }
+.fw-progress { flex: 1 1 100%; font-size: .88rem; color: var(--muted); min-height: 1.35em; margin: .15rem 0 0; }
+.fw-progress progress { width: 100%; max-width: 28rem; height: 4px; margin-top: .35rem; accent-color: var(--accent); }
+.fw-drop { font-size: .85rem; color: var(--muted); }
+.fw-drop input[type=file] { font: inherit; max-width: 14rem; }
+.deck-note { margin: 0 0 .8rem; color: var(--muted); max-width: 72ch; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1 id="page-title">TRIPTYCH</h1>
+    <p id="page-tag">for the M-VAVE FM-1 — three MIDI-first generative engines in WebAssembly + WebMIDI</p>
+  </header>
+  <section class="fw-bar" aria-label="Firmware">
+    <h2>Firmware</h2>
+    <div class="fw-row">
+      <span class="fw-label">Browser</span>
+      <div class="modes" id="emu-pick" role="group" aria-label="Browser emulator">
+        <button type="button" data-emu="rytm">KO RYTM</button>
+        <button type="button" data-emu="ctrl">KO CTRL</button>
+        <button type="button" data-emu="dub">KO DUB</button>
+        <button type="button" data-emu="hiphop">KO HIPHOP</button>
+        <button type="button" data-emu="pop">KO POP</button>
+        <button type="button" data-emu="funk">KO FUNK</button>
+        <button type="button" data-emu="house">KO HOUSE</button>
+        <button type="button" data-emu="heavypsych">KO HVYPSY</button>
+        <button type="button" data-emu="jazz">KO JAZZ</button>
+        <button type="button" data-emu="soul">KO SOUL</button>
+        <button type="button" data-emu="idm">KO IDM</button>
+        <button type="button" data-emu="snowcrash">KO XCRASH</button>
+        <button type="button" data-emu="techno">KO TECHNO</button>
+        <button type="button" data-emu="triphop">KO TRIPHOP</button>
+        <button type="button" data-emu="deck">KO KIT</button>
+        <button type="button" data-emu="jet">KO JET</button>
+        <button type="button" data-emu="bass">KO BASS</button>
+        <button type="button" data-emu="triptych" class="on">TRIPTYCH</button>
+        <button type="button" data-emu="x0x">X0X</button>
+      </div>
+    </div>
+    <div class="fw-row">
+      <span class="fw-label">Hardware</span>
+      <span class="fw-id muted" id="hw-id">No FM-1 detected — connect USB (Chrome / Edge, SysEx).</span>
+    </div>
+    <div class="fw-row">
+      <span class="fw-label">Flash</span>
+      <div class="fw-flash" id="hw-flash"></div>
+    </div>
+    <div class="fw-row">
+      <span class="fw-label">Drop</span>
+      <label class="fw-drop"><input type="file" id="fw-drop" accept=".fwsc"> Custom <code>.fwsc</code></label>
+    </div>
+    <p class="fw-progress" id="hw-progress" role="status"></p>
+  </section>
+  <p class="turn">Turn your phone sideways for bigger controls.</p>
+  <div class="device" id="device">
+    <svg id="panel" viewBox="0 0 1000 640" xmlns="http://www.w3.org/2000/svg"></svg>
+    <canvas id="lcd" width="240" height="240" aria-label="FM-1 screen"></canvas>
+    <div class="start" id="start">
+      <button type="button" id="go">Switch on</button>
+    </div>
+  </div>
+  <div class="bar">
+    <span id="status">Off. Sound starts when you switch it on.</span>
+    <span class="cpu" id="cpu"></span>
+    <button type="button" id="reset">Factory reset</button>
+  </div>
+
+  <section class="deck" id="deck" hidden>
+    <h2>MIDI control deck</h2>
+    <p id="deck-intro">Connect a USB MIDI controller or use the faders below. Incoming messages go straight into the firmware; CC moves update the 240×240 HUD on the unit.</p>
+    <p class="deck-note" id="deck-note" hidden></p>
+    <div class="midi-row">
+      <label for="midi-in">WebMIDI input</label>
+      <select id="midi-in"><option value="">— no device —</option></select>
+      <span id="midi-status" style="color:var(--muted);font-size:.92rem"></span>
+    </div>
+    <div class="modes" id="modes" role="group" aria-label="Engine mode">
+      <button type="button" data-mode="0" class="on">CYCLIC</button>
+      <button type="button" data-mode="1">CONTURA</button>
+      <button type="button" data-mode="2">DIT DAH</button>
+      <button type="button" id="dd-bksp" title="Delete last Morse letter (REC / Backspace)">⌫ Backspace (REC)</button>
+      <button type="button" id="dd-clr" title="Clear Morse phrase (SEQ / Delete)">✕ Clear (SEQ)</button>
+      <button type="button" id="lfo-rst" title="Reset all active LFO modulations (LFO ×3)">⟲ Reset All LFOs (LFO)</button>
+    </div>
+    <div class="fader-grid" id="faders"></div>
+  </section>
+
+  <p class="help">Knobs: drag or scroll. Keys: mouse/touch with glissando (in <strong>DIT DAH</strong>, keys 1–26 type A–Z and key 27 types Space; <kbd>REC</kbd> / <kbd>Backspace</kbd> deletes last letter, <kbd>SEQ</kbd> / <kbd>Delete</kbd> clears). Keyboard: <kbd>Q</kbd>–<kbd>I</kbd> and <kbd>A</kbd>–<kbd>K</kbd> (white), <kbd>1</kbd>–<kbd>0</kbd> and <kbd>-</kbd> (black). <kbd>Space</kbd> PLAY/STOP, <kbd>Esc</kbd> HOME, <kbd>Z</kbd>/<kbd>X</kbd> OCT−/OCT+.</p>
+</main>
+<script>
+"use strict";
+// hoisted: used by applyEmuProfileUI() at script start (TDZ otherwise)
+const RATIOS_FMT = ["1:1", "1:2", "2:1", "1:3", "3:1", "2:3", "3:2", "1:4"];
+const NS = "http://www.w3.org/2000/svg";
+const BTN = { "OCT-": 0, "OCT+": 1, FX: 2, SEL: 3, ENV: 4, LFO: 5, EDIT: 6, GLO: 7, HOME: 8, SAVE: 9, ARP: 10, SEQ: 11, PLAY: 12, REC: 13 };
+const ENC = { SELECT: 0, ALGORITHM: 1, KNOB1: 2, KNOB2: 3, KNOB3: 4, KNOB4: 5, PRESETS: 6 };
+const WHITE_K = [0, 2, 4, 6, 7, 9, 11, 12, 14, 16, 18, 19, 21, 23, 24, 26];
+const BLACK_K = [1, 3, 5, 8, 10, 13, 15, 17, 20, 22, 25];
+const BLACK_AFTER = [0, 1, 2, 4, 5, 7, 8, 9, 11, 12, 14];
+const BODY = "#3a3d42", TRAY = "#26282c", KEY_W = "#d9dadc", KEY_B = "#c9cacd", KNOB = "#1f2124", BTNC = "#2e3135", LABEL = "#e8e8ea";
+const EMU_PROFILES = {
+  triptych: {
+    title: "TRIPTYCH",
+    tag: "for the M-VAVE FM-1 — three MIDI-first generative engines in WebAssembly + WebMIDI",
+    wasm: "triptych.wasm",
+    wasmFallback: "kosmar_fm1.wasm",
+    storeKey: "triptych-fm1-emu-v4",
+    deck: "triptych"
+  },
+  rytm: {
+    title: "KO RYTM",
+    tag: "for the M-VAVE FM-1 — generative drum machine in WebAssembly + WebMIDI",
+    wasm: "fm_rytm.wasm",
+    storeKey: "fm-rytm-fm1-emu-v1",
+    deck: "rytm"
+  },
+  ctrl: {
+    title: "KO CTRL",
+    tag: "for the M-VAVE FM-1 — smart MIDI controller, chord/scale workstation & 16-LFO CC modulator in WebAssembly + WebMIDI",
+    wasm: "fm_ctrl.wasm",
+    storeKey: "fm-ctrl-fm1-emu-v1",
+    deck: "ctrl"
+  },
+  dub: {
+    title: "KO DUB",
+    tag: "for the M-VAVE FM-1 — a dub machine in WebAssembly + WebMIDI",
+    wasm: "fm_dub.wasm",
+    storeKey: "fm-dub-fm1-emu-v1",
+    deck: "dub"
+  },
+  hiphop: {
+    title: "KO HIPHOP",
+    tag: "for the M-VAVE FM-1 — hip-hop beat desk in WebAssembly + WebMIDI",
+    wasm: "fm_hiphop.wasm",
+    storeKey: "fm-hiphop-fm1-emu-v2",
+    deck: "hiphop"
+  },
+  pop: {
+    title: "KO POP",
+    tag: "for the M-VAVE FM-1 — synth-pop track desk (KO POP) in WebAssembly + WebMIDI",
+    wasm: "fm_pop.wasm",
+    storeKey: "fm-pop-fm1-emu-v1",
+    deck: "pop"
+  },
+  funk: {
+    title: "KO FUNK",
+    tag: "for the M-VAVE FM-1 — funk and disco groove desk in WebAssembly + WebMIDI",
+    wasm: "fm_funk.wasm",
+    storeKey: "fm-funk-fm1-emu-v1",
+    deck: "funk"
+  },
+  house: {
+    title: "KO HOUSE",
+    tag: "for the M-VAVE FM-1 — four-on-the-floor desk in WebAssembly + WebMIDI",
+    wasm: "fm_house.wasm",
+    storeKey: "fm-house-fm1-emu-v1",
+    deck: "house"
+  },
+  heavypsych: {
+    title: "KO HVYPSY",
+    tag: "for the M-VAVE FM-1 — heavy psych riff desk in WebAssembly + WebMIDI",
+    wasm: "fm_heavypsych.wasm",
+    storeKey: "fm-hvypsy-fm1-emu-v1",
+    deck: "heavypsych"
+  },
+  jazz: {
+    title: "KO JAZZ",
+    tag: "for the M-VAVE FM-1 — jazz trax desk in WebAssembly + WebMIDI",
+    wasm: "fm_jazz.wasm",
+    storeKey: "fm-jazz-fm1-emu-v1",
+    deck: "jazz"
+  },
+  soul: {
+    title: "KO SOUL",
+    tag: "for the M-VAVE FM-1 — soul groove desk in WebAssembly + WebMIDI",
+    wasm: "fm_soul.wasm",
+    storeKey: "fm-soul-fm1-emu-v1",
+    deck: "soul"
+  },
+  idm: {
+    title: "KO IDM",
+    tag: "for the M-VAVE FM-1 — IDM piece desk in WebAssembly + WebMIDI",
+    wasm: "fm_idm.wasm",
+    storeKey: "fm-idm-fm1-emu-v1",
+    deck: "idm"
+  },
+  snowcrash: {
+    title: "KO XCRASH",
+    tag: "for the M-VAVE FM-1 — snowcrash slab desk in WebAssembly + WebMIDI",
+    wasm: "fm_snowcrash.wasm",
+    storeKey: "fm-snowcrash-fm1-emu-v1",
+    deck: "snowcrash"
+  },
+  techno: {
+    title: "KO TECHNO",
+    tag: "for the M-VAVE FM-1 — techno loop desk in WebAssembly + WebMIDI",
+    wasm: "fm_techno.wasm",
+    storeKey: "fm-techno-fm1-emu-v1",
+    deck: "techno"
+  },
+  triphop: {
+    title: "KO TRIPHOP",
+    tag: "for the M-VAVE FM-1 — trip-hop track desk in WebAssembly + WebMIDI",
+    wasm: "fm_triphop.wasm",
+    storeKey: "fm-triphop-fm1-emu-v1",
+    deck: "triphop"
+  },
+  deck: {
+    title: "KO KIT",
+    tag: "KO VOICES — drum machine for the M-VAVE FM-1 in WebAssembly + WebMIDI",
+    wasm: "fm_deck.wasm",
+    wasmRev: "20261103",
+    storeKey: "fm-deck-fm1-emu-v3",
+    deck: "deck"
+  },
+  jet: {
+    title: "KO JET",
+    tag: "Steampipe-style jet synth for the M-VAVE FM-1 in WebAssembly + WebMIDI",
+    wasm: "fm_jet.wasm",
+    storeKey: "fm-jet-fm1-emu-v1",
+    deck: "jet"
+  },
+  bass: {
+    title: "KO BASS",
+    tag: "KO VOICES — bass line desk for the M-VAVE FM-1 in WebAssembly + WebMIDI",
+    wasm: "fm_bass.wasm",
+    storeKey: "fm-bass-fm1-emu-v6",
+    deck: "bass"
+  },
+  x0x: {
+    title: "X0X",
+    tag: "for the M-VAVE FM-1 — drum box emulator (WebAssembly + WebMIDI)",
+    wasm: "x0x.wasm",
+    storeKey: "x0x-fm1-emu-v1",
+    deck: "x0x"
+  }
+};
+const EMU_LS = "fm1-emu-profile-v1";
+let emuProfile = (() => {
+  try {
+    const qp = new URLSearchParams(location.search).get("emu");
+    if (qp && EMU_PROFILES[qp]) {
+      localStorage.setItem(EMU_LS, qp);
+      return qp;
+    }
+    let s = localStorage.getItem(EMU_LS);
+    if (s === "dxfm") {
+      s = "pop";
+      localStorage.setItem(EMU_LS, s);
+    }
+    return EMU_PROFILES[s] ? s : "triptych";
+  } catch { return "triptych"; }
+})();
+function storeKey() { return EMU_PROFILES[emuProfile].storeKey; }
+(function migratePopStore() {
+  if (emuProfile !== "pop") return;
+  const key = EMU_PROFILES.pop.storeKey;
+  const legacy = "fm-dxfm-fm1-emu-v1";
+  try {
+    if (!localStorage.getItem(key) && localStorage.getItem(legacy)) {
+      localStorage.setItem(key, localStorage.getItem(legacy));
+      localStorage.removeItem(legacy);
+    }
+  } catch {}
+})();
+const DEF_CC = [1, 2, 73, 72, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 33];
+const DEF_VAL = [26, 20, 6, 72, 0, 28, 96, 74, 48, 32, 28, 64, 68, 0, 28, 56, 0, 36, 0, 0];
+const MODE_PRESETS = [
+  [26, 20, 6, 72, 0, 28, 96, 74, 48, 32, 28],
+  [32, 36, 4, 60, 35, 32, 88, 96, 54, 24, 52],
+  [38, 20, 2, 44, 38, 0, 68, 80, 60, 0, 72]
+];
+const BANK_TITLES = ["SYNTH (ENV)", "ENGINE (SEL)", "TIME (GLO)", "SPACE (FX)", "LFO (LFO)"];
+const STATIC_NAMES = ["TIMBRE", "RATIO", "ATTACK", "DECAY", "P4", "P5", "P6", "P7",
+  "TEMPO", "SWING", "RATE", "OCTAVE", "DETUNE", "DRIVE", "E.MIX", "E.TIME",
+  "TARGET", "FREQ", "DEPTH", "SHAPE"];
+/** Per-deck fader layout (5 banks × 4). Triptych uses DEF_CC / BANK_TITLES / STATIC_NAMES. */
+const DECK_CC = {
+  jet: {
+    titles: ["STEAM", "PIPE", "BODY", "TAIL", "SPACE"],
+    names: [
+      ["BLOW", "DC/NZ", "NZ LPF", "ATK"],
+      ["PUSH", "LPF", "HPF", "HARM"],
+      ["SAT", "SYM", "SPLIT", "FB DEC"],
+      ["FB REL", "REL", "DEC", "SUS"],
+      ["GLIDE", "REV MIX", "DLY LVL", "BREATH"]
+    ],
+    cc: [
+      [20, 30, 31, 73],
+      [21, 22, 23, 24],
+      [25, 26, 27, 28],
+      [29, 72, 75, 79],
+      [5, 91, 94, 2]
+    ],
+    def: [90, 40, 96, 30, 28, 100, 20, 0, 50, 0, 0, 100, 40, 50, 60, 100, 0, 30, 0, 0]
+  }
+};
+/* Must be initialized before applyEmuProfileUI() — that calls rebuildFadersIfDeckChanged(). */
+let fadersBuiltForDeck = null;
+function faderDeckKey() { return EMU_PROFILES[emuProfile].deck; }
+function faderDeckCfg() { return DECK_CC[faderDeckKey()] || null; }
+function faderBankTitle(b) {
+  const cfg = faderDeckCfg();
+  return cfg ? cfg.titles[b] : BANK_TITLES[b];
+}
+function faderCc(i) {
+  const cfg = faderDeckCfg();
+  if (cfg) return cfg.cc[(i / 4) | 0][i % 4];
+  return DEF_CC[i];
+}
+const ENGINE_LABELS = [
+  ["AXIS", "MOTION", "DENSITY", "VOICING"],
+  ["SCALE", "PHRASE", "DENSITY", "LAYERS"],
+  ["INTERVAL", "PHRASE", "DENSITY", "ACCENT"]
+];
+
+const svg = document.getElementById("panel");
+function el(tag, attrs, parent = svg) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  parent.appendChild(e);
+  return e;
+}
+function text(parent, x, y, s, size, fill = LABEL, weight = 600) {
+  const t = el("text", { x, y, "text-anchor": "middle", "font-family": "'Barlow Semi Condensed', 'Arial Narrow', Arial, sans-serif",
+    "font-size": size, "font-weight": weight, fill, "letter-spacing": ".05em", class: "btn", "pointer-events": "none" }, parent);
+  t.textContent = s;
+  return t;
+}
+
+el("rect", { x: 4, y: 4, width: 992, height: 632, rx: 44, fill: BODY });
+const knobs = {};
+function knob(x, y, r, label, role) {
+  const g = el("g", { class: "ctl knob", tabindex: 0, role: "slider", "aria-label": label });
+  el("circle", { cx: x, cy: y, r: r + 5, fill: TRAY }, g);
+  el("circle", { cx: x, cy: y, r, fill: KNOB, stroke: "#44474c", "stroke-width": 2 }, g);
+  const ind = el("line", { x1: x, y1: y - r + 5, x2: x, y2: y - r + 15, stroke: LABEL, "stroke-width": 3, "stroke-linecap": "round" }, g);
+  text(g, x, y - r - 12, label, 17);
+  el("circle", { cx: x, cy: y, r: r + 14, fill: "transparent" }, g);
+  knobs[label] = { g, ind, x, y, angle: 0, role };
+  return knobs[label];
+}
+knob(105, 100, 24, "MASTER", "master");
+knob(215, 100, 24, "SELECT", ENC.SELECT);
+knob(105, 205, 24, "PRESETS", ENC.PRESETS);
+knob(215, 205, 24, "ALGORITHM", ENC.ALGORITHM);
+for (let i = 0; i < 4; i++) knob(610 + i * 104, 100, 22, `KNOB ${i + 1}`, ENC[`KNOB${i + 1}`]);
+
+const buttons = {};
+function button(x, y, w, h, label, two) {
+  const g = el("g", { class: "ctl", role: "button", "aria-label": label });
+  el("rect", { x, y, width: w, height: h, rx: 9, fill: BTNC, stroke: "#4a4d52", "stroke-width": 1.5, class: "btnface" }, g);
+  if (two) { text(g, x + w / 2, y + h / 2 - 1, label, 12); text(g, x + w / 2, y + h / 2 + 12, two, 12); }
+  else text(g, x + w / 2, y + h / 2 + 5, label, 15);
+  buttons[label] = { g, bit: BTN[label] };
+}
+el("rect", { x: 58, y: 258, width: 210, height: 58, rx: 14, fill: TRAY });
+button(72, 268, 82, 38, "OCT-"); button(170, 268, 82, 38, "OCT+");
+el("rect", { x: 300, y: 44, width: 236, height: 236, rx: 26, fill: "#111214" });
+el("rect", { x: 568, y: 160, width: 400, height: 140, rx: 18, fill: TRAY });
+const ROW1 = ["FX", "SEL", "ENV", "LFO", "EDIT", "GLO"], ROW2 = ["HOME", "SAVE", "ARP", "SEQ", "PLAY", "REC"];
+for (let i = 0; i < 6; i++) {
+  button(582 + i * 63, 174, 54, 48, ROW1[i]);
+  if (ROW2[i] === "PLAY") button(582 + i * 63, 236, 54, 48, "PLAY", "STOP");
+  else button(582 + i * 63, 236, 54, 48, ROW2[i]);
+}
+
+const keys = [];
+(function keybed(x0, y0, w, h) {
+  el("rect", { x: x0, y: y0, width: w, height: h, rx: 18, fill: TRAY });
+  const pitch = (w - 24) / 16, kw = pitch * 0.78;
+  for (let i = 0; i < 16; i++) {
+    const g = el("g", { class: "ctl", role: "button", "aria-label": `white key ${i + 1}` });
+    el("rect", { x: x0 + 12 + i * pitch + (pitch - kw) / 2, y: y0 + h * 0.43, width: kw, height: h * 0.52, rx: kw / 2,
+      fill: KEY_W, class: "keyface white" }, g);
+    keys[WHITE_K[i]] = { g, pitch, kw, x0, y0, h, white: i };
+  }
+  BLACK_AFTER.forEach((a, k) => {
+    const g = el("g", { class: "ctl", role: "button", "aria-label": `black key ${k + 1}` });
+    el("rect", { x: x0 + 12 + (a + 1) * pitch - kw / 2, y: y0 + h * 0.06, width: kw, height: h * 0.33, rx: kw / 2,
+      fill: KEY_B, class: "keyface black" }, g);
+    keys[BLACK_K[k]] = { g, pitch, kw, x0, y0, h, black: k, after: a };
+  });
+})(36, 340, 928, 270);
+
+const device = document.getElementById("device");
+function hit(c, cls) {
+  const b = c.g.getBBox(), d = document.createElement("div");
+  d.className = "hit" + (cls ? " " + cls : "");
+  Object.assign(d.style, { left: `${b.x / 10}%`, top: `${b.y / 6.4}%`, width: `${b.width / 10}%`, height: `${b.height / 6.4}%` });
+  for (const a of ["role", "aria-label", "tabindex"]) if (c.g.hasAttribute(a)) { d.setAttribute(a, c.g.getAttribute(a)); c.g.removeAttribute(a); }
+  c.g.setAttribute("aria-hidden", "true");
+  d.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
+  device.insertBefore(d, document.getElementById("start"));
+  c.hit = d;
+}
+for (const k of Object.values(knobs)) hit(k, "knob");
+for (const b of Object.values(buttons)) hit(b);
+keys.forEach((k) => { if (k) hit(k); });
+
+let node = null, btnMask = 0, keyMask = 0, latched = 0, master = 2800, engineMode = 0;
+const btnHeldBy = new Map(), keyHeldBy = new Map();
+const ccVal = (faderDeckCfg()?.def || DEF_VAL).slice();
+function send(m) { if (node) node.port.postMessage(m); }
+function sendMidi(st, d1, d2) { send({ type: "midi", st, d1, d2 }); }
+
+function syncButtons() {
+  let m = latched;
+  for (const b of btnHeldBy.values()) m |= 1 << b;
+  if (m !== btnMask) { btnMask = m; send({ type: "buttons", mask: m }); }
+  for (const b of Object.values(buttons)) {
+    b.g.classList.toggle("held", !!(m & (1 << b.bit)));
+    b.g.classList.toggle("latched", !!(latched & (1 << b.bit)));
+    b.hit.classList.toggle("latched", !!(latched & (1 << b.bit)));
+    b.hit.setAttribute("aria-pressed", m & (1 << b.bit) ? "true" : "false");
+  }
+}
+function syncKeys() {
+  let m = 0;
+  for (const k of keyHeldBy.values()) m |= 1 << k;
+  if (m !== keyMask) { keyMask = m; send({ type: "keys", mask: m }); }
+  keys.forEach((k, i) => { if (k) k.g.classList.toggle("held", !!(m & (1 << i))); });
+}
+
+for (const b of Object.values(buttons)) {
+  b.hit.addEventListener("contextmenu", (e) => e.preventDefault());
+  b.hit.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    if (e.shiftKey || e.button === 2) { latched ^= 1 << b.bit; syncButtons(); return; }
+    if (latched & (1 << b.bit)) { latched &= ~(1 << b.bit); syncButtons(); return; }
+    b.hit.setPointerCapture(e.pointerId);
+    btnHeldBy.set("p" + e.pointerId, b.bit);
+    syncButtons();
+  });
+}
+
+function keyAtClient(clientX, clientY) {
+  const rect = device.getBoundingClientRect();
+  const sx = 1000 / rect.width, sy = 640 / rect.height;
+  const x = (clientX - rect.left) * sx, y = (clientY - rect.top) * sy;
+  const x0 = 36, y0 = 340, w = 928, h = 270;
+  if (x < x0 || x > x0 + w || y < y0 || y > y0 + h) return -1;
+  const pitch = (w - 24) / 16, kw = pitch * 0.78;
+  for (let k = 0; k < BLACK_K.length; k++) {
+    const a = BLACK_AFTER[k], bx = x0 + 12 + (a + 1) * pitch - kw / 2, by = y0 + h * 0.06, bh = h * 0.33;
+    if (x >= bx && x <= bx + kw && y >= by && y <= by + bh) return BLACK_K[k];
+  }
+  for (let i = 0; i < 16; i++) {
+    const wx = x0 + 12 + i * pitch + (pitch - kw) / 2, wy = y0 + h * 0.43, wh = h * 0.52;
+    if (x >= wx && x <= wx + kw && y >= wy && y <= wy + wh) return WHITE_K[i];
+  }
+  return -1;
+}
+
+keys.forEach((k, i) => {
+  if (!k) return;
+  k.hit.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    k.hit.setPointerCapture(e.pointerId);
+    keyHeldBy.set("p" + e.pointerId, i);
+    syncKeys();
+  });
+});
+device.addEventListener("pointermove", (e) => {
+  const id = "p" + e.pointerId;
+  if (!keyHeldBy.has(id)) return;
+  const ki = keyAtClient(e.clientX, e.clientY);
+  if (ki >= 0 && keyHeldBy.get(id) !== ki) { keyHeldBy.set(id, ki); syncKeys(); }
+});
+function pointerUp(e) {
+  const id = "p" + e.pointerId;
+  if (btnHeldBy.delete(id)) syncButtons();
+  if (keyHeldBy.delete(id)) syncKeys();
+}
+device.addEventListener("pointerup", pointerUp);
+device.addEventListener("pointercancel", pointerUp);
+device.addEventListener("lostpointercapture", pointerUp);
+
+function drawKnob(k) { k.ind.setAttribute("transform", `rotate(${k.angle} ${k.x} ${k.y})`); }
+function turn(k, n) {
+  if (!n) return;
+  if (k.role === "master") {
+    master = Math.max(0, Math.min(4096, master + n * 64));
+    k.angle = -135 + 270 * master / 4096;
+    send({ type: "master", value: master });
+  } else {
+    k.angle = (k.angle + n * 18) % 360;
+    send({ type: "enc", role: k.role, n });
+  }
+  drawKnob(k);
+}
+for (const k of Object.values(knobs)) {
+  if (k.role === "master") { k.angle = -135 + 270 * master / 4096; drawKnob(k); }
+  let drag = null, wheel = 0;
+  k.hit.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    k.hit.setPointerCapture(e.pointerId);
+    drag = { y: e.clientY, acc: 0 };
+  });
+  k.hit.addEventListener("pointermove", (e) => {
+    if (!drag) return;
+    drag.acc += drag.y - e.clientY;
+    drag.y = e.clientY;
+    const step = k.role === "master" ? 3 : 4;
+    const n = Math.trunc(drag.acc / step);
+    if (n) { drag.acc -= n * step; turn(k, n); }
+  });
+  const end = () => { drag = null; };
+  k.hit.addEventListener("pointerup", end);
+  k.hit.addEventListener("pointercancel", end);
+  k.hit.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY;
+    if (Math.abs(dy) >= 50) { turn(k, dy < 0 ? 1 : -1); wheel = 0; return; }
+    wheel -= dy;
+    const n = Math.trunc(wheel / 25);
+    if (n) { wheel -= n * 25; turn(k, n); }
+  }, { passive: false });
+  k.hit.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowUp" || e.key === "ArrowRight") { turn(k, 1); e.preventDefault(); e.stopPropagation(); }
+    if (e.key === "ArrowDown" || e.key === "ArrowLeft") { turn(k, -1); e.preventDefault(); e.stopPropagation(); }
+  });
+}
+
+const KEYMAP = {};
+"qwertyui".split("").forEach((c, i) => KEYMAP["Key" + c.toUpperCase()] = { key: WHITE_K[i] });
+"asdfghjk".split("").forEach((c, i) => KEYMAP["Key" + c.toUpperCase()] = { key: WHITE_K[8 + i] });
+"1234567890".split("").forEach((c, i) => KEYMAP["Digit" + c] = { key: BLACK_K[i] });
+KEYMAP.Minus = { key: BLACK_K[10] };
+Object.assign(KEYMAP, {
+  Space: { btn: BTN.PLAY },
+  Escape: { btn: BTN.HOME },
+  KeyZ: { btn: BTN["OCT-"] },
+  KeyX: { btn: BTN["OCT+"] },
+  Backspace: { btn: BTN.REC },
+  Delete: { btn: BTN.SEQ }
+});
+addEventListener("keydown", (e) => {
+  if (!node || e.metaKey || e.ctrlKey || e.altKey) return;
+  const m = KEYMAP[e.code];
+  if (!m) return;
+  e.preventDefault();
+  if (e.repeat) return;
+  if (m.key !== undefined) { keyHeldBy.set("k" + e.code, m.key); syncKeys(); }
+  else { btnHeldBy.set("k" + e.code, m.btn); syncButtons(); }
+});
+addEventListener("keyup", (e) => {
+  const id = "k" + e.code;
+  if (keyHeldBy.delete(id)) syncKeys();
+  if (btnHeldBy.delete(id)) syncButtons();
+});
+addEventListener("blur", () => {
+  for (const id of [...btnHeldBy.keys()]) if (id[0] === "k") btnHeldBy.delete(id);
+  for (const id of [...keyHeldBy.keys()]) if (id[0] === "k") keyHeldBy.delete(id);
+  syncButtons(); syncKeys();
+});
+
+const ctx = document.getElementById("lcd").getContext("2d");
+const img = ctx.createImageData(240, 240);
+function drawScreen(fb) {
+  const d = img.data;
+  for (let i = 0; i < 240 * 240; i++) {
+    const p = fb[i] & 0xFFFF;
+    d[i * 4] = ((p >> 11) & 31) * 255 / 31;
+    d[i * 4 + 1] = ((p >> 5) & 63) * 255 / 63;
+    d[i * 4 + 2] = (p & 31) * 255 / 31;
+    d[i * 4 + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+}
+function drawLights(b, k, dim = 0, lfoBtn = 0, arpBtn = 0, seqBtn = 0, recBtn = 0) {
+  for (const x of Object.values(buttons)) {
+    const pulse = x.bit === BTN.LFO ? lfoBtn : x.bit === BTN.ARP ? arpBtn : x.bit === BTN.SEQ ? seqBtn : x.bit === BTN.REC ? recBtn : 0;
+    if (pulse > 0) {
+      x.g.classList.add("lit");
+      x.g.classList.remove("dim");
+      x.g.style.opacity = String(0.12 + (pulse / 255) * 0.88);
+    } else {
+      const isLit = !!(b & (1 << x.bit));
+      const isDim = !isLit && !!(dim & (1 << x.bit));
+      x.g.style.opacity = isDim ? "0.28" : "";
+      x.g.classList.toggle("lit", isLit || isDim);
+      x.g.classList.toggle("dim", isDim);
+    }
+  }
+  keys.forEach((x, i) => {
+    if (!x) return;
+    x.g.classList.toggle("lit", !!(k & (1 << i)));
+  });
+}
+
+function storeBytes(u8) {
+  if (u8 instanceof Uint8Array) return u8;
+  if (u8 instanceof ArrayBuffer) return new Uint8Array(u8);
+  return new Uint8Array(u8);
+}
+function loadStore() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(storeKey()) || "{}"), out = {};
+    for (const [o, b64] of Object.entries(raw)) out[o] = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    return out;
+  } catch { return {}; }
+}
+function saveStore(store) {
+  try {
+    const raw = {};
+    for (const [o, u8] of Object.entries(store)) {
+      const b = storeBytes(u8);
+      let s = "";
+      for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]);
+      raw[o] = btoa(s);
+    }
+    localStorage.setItem(storeKey(), JSON.stringify(raw));
+  } catch { /* session only */ }
+}
+function flushEmuStore() {
+  if (node) node.port.postMessage({ type: "flushStore" });
+}
+window.addEventListener("pagehide", flushEmuStore);
+
+function applyEmuProfileUI() {
+  const p = EMU_PROFILES[emuProfile];
+  document.getElementById("page-title").textContent = p.title;
+  document.getElementById("page-tag").textContent = p.tag;
+  document.querySelectorAll("#emu-pick button[data-emu]").forEach((b) => {
+    b.classList.toggle("on", b.dataset.emu === emuProfile);
+    if (b.dataset.emu === "x0x" || b.dataset.emu === "idm" || b.dataset.emu === "snowcrash")
+      b.disabled = !!b.dataset.missing;
+  });
+  const triptychDeck = p.deck === "triptych";
+  document.getElementById("modes").hidden = !triptychDeck;
+  document.getElementById("deck-intro").hidden = !triptychDeck;
+  const note = document.getElementById("deck-note");
+  if (triptychDeck) {
+    note.hidden = true;
+    note.textContent = "";
+  } else if (p.deck === "rytm") {
+    note.hidden = false;
+    note.textContent = "KO RYTM uses the panel and MIDI CC — the TRIPTYCH engine mode buttons don\u2019t apply here.";
+  } else if (p.deck === "ctrl") {
+    note.hidden = false;
+    note.textContent = "KO CTRL turns the panel into a 16-CC / 16-LFO MIDI workstation with scale-quantized chords, Euclidean step sequencing and VST profiles \u2014 use the panel knobs, keys and WebMIDI.";
+  } else if (p.deck === "dub") {
+    note.hidden = false;
+    note.textContent = "KO DUB uses the panel as a dub mixer \u2014 TRIPTYCH mode buttons don\u2019t apply.";
+  } else if (p.deck === "house") {
+    note.hidden = false;
+    note.textContent = "KO HOUSE uses the panel as a four-on-the-floor desk \u2014 TRIPTYCH mode buttons don\u2019t apply.";
+  } else if (p.deck === "heavypsych") {
+    note.hidden = false;
+    note.textContent = "KO HVYPSY uses the panel as a heavy psych riff desk \u2014 TRIPTYCH mode buttons don\u2019t apply.";
+  } else if (p.deck === "jazz") {
+    note.hidden = false;
+    note.textContent = "KO JAZZ uses the panel as a jazz trax desk \u2014 TRIPTYCH mode buttons don\u2019t apply.";
+  } else if (p.deck === "soul") {
+    note.hidden = false;
+    note.textContent = "KO SOUL uses the panel as a soul groove desk \u2014 TRIPTYCH mode buttons don\u2019t apply.";
+  } else if (p.deck === "idm") {
+    note.hidden = false;
+    note.textContent = "KO IDM uses the panel as an IDM piece desk \u2014 TRIPTYCH mode buttons don\u2019t apply.";
+  } else if (p.deck === "snowcrash") {
+    note.hidden = false;
+    note.textContent = "KO XCRASH uses the panel as a snowcrash slab desk \u2014 TRIPTYCH mode buttons don\u2019t apply.";
+  } else if (p.deck === "hiphop") {
+    note.hidden = false;
+    note.textContent = "KO HIPHOP uses the panel as a beat desk \u2014 TRIPTYCH mode buttons don\u2019t apply.";
+  } else if (p.deck === "pop") {
+    note.hidden = false;
+    note.textContent = "KO POP uses the panel as a synth-pop track desk \u2014 TRIPTYCH mode buttons don\u2019t apply.";
+  } else if (p.deck === "funk") {
+    note.hidden = false;
+    note.textContent = "KO FUNK uses the panel as a funk desk \u2014 TRIPTYCH mode buttons don\u2019t apply.";
+  } else if (p.deck === "techno") {
+    note.hidden = false;
+    note.textContent = "KO TECHNO uses the panel as a techno loop desk \u2014 TRIPTYCH mode buttons don\u2019t apply.";
+  } else if (p.deck === "triphop") {
+    note.hidden = false;
+    note.textContent = "KO TRIPHOP uses the panel as a trip-hop track desk \u2014 TRIPTYCH mode buttons don\u2019t apply.";
+  } else if (p.deck === "deck") {
+    note.hidden = false;
+    note.textContent = "KO KIT uses the panel as a 16-voice drum machine \u2014 white keys = steps, black keys = live pads, SEQ toggles Linn/Synth encoder pages. TRIPTYCH mode buttons don\u2019t apply.";
+  } else if (p.deck === "jet") {
+    note.hidden = false;
+    note.textContent = "KO JET \u2014 steampipe synth, mono seq + REC. GLO = groove, HOME = voice/mix pages, TRIPTYCH mode buttons don\u2019t apply.";
+  } else if (p.deck === "bass") {
+    note.hidden = false;
+    note.textContent = "KO BASS uses the panel as a bass line desk \u2014 GLO = GROOVE (key, scale, swing, BPM \u00b7 MIDI, clock, transpose, vel), SEL = VOICE, ENV = envelope. TRIPTYCH mode buttons don\u2019t apply.";
+  } else {
+    note.hidden = false;
+    note.textContent = "X0X runs its own firmware image when a build is present; use the panel or WebMIDI.";
+  }
+  document.title = `${p.title} — M-VAVE FM-1 in the browser`;
+  rebuildFadersIfDeckChanged();
+}
+
+document.getElementById("emu-pick").addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-emu]");
+  if (!btn || btn.disabled) return;
+  const next = btn.dataset.emu;
+  if (next === emuProfile) return;
+  if (node) {
+    if (!confirm("Switch emulator? This reloads the page and stops audio.")) return;
+  }
+  emuProfile = next;
+  try { localStorage.setItem(EMU_LS, emuProfile); } catch {}
+  if (node) location.reload();
+  else applyEmuProfileUI();
+});
+
+let emuInventory = null;
+async function loadEmuInventory() {
+  if (emuInventory) return emuInventory;
+  try {
+    const r = await fetch("inventory.json", { cache: "no-store" });
+    if (r.ok) emuInventory = await r.json();
+  } catch {}
+  return emuInventory;
+}
+function inventoryHasWasm(name) {
+  return !!(emuInventory && Array.isArray(emuInventory.wasm) && emuInventory.wasm.includes(name));
+}
+function inventoryHasFw(path) {
+  const name = path.split("/").pop();
+  return !!(emuInventory && Array.isArray(emuInventory.fw) && emuInventory.fw.includes(name));
+}
+window.loadEmuInventory = loadEmuInventory;
+window.inventoryHasFw = inventoryHasFw;
+async function markOptionalWasm(btn, wasm, hint) {
+  if (!btn) return;
+  await loadEmuInventory();
+  let ok = inventoryHasWasm(wasm);
+  if (!ok && !emuInventory) {
+    try {
+      const r = await fetch(wasm, { method: "HEAD", cache: "no-store" });
+      ok = r.ok;
+    } catch {}
+  }
+  if (!ok) {
+    btn.dataset.missing = "1";
+    btn.disabled = true;
+    btn.title = hint;
+  }
+}
+
+const DIVS_FMT = ["1/1", "1/2", "1/4", "1/4T", "1/8", "1/8T", "1/16", "1/16T", "1/32", "1/32T", "1/64"];
+const DITDAH_PRESETS_FMT = [
+  "01 Mono Pulse", "02 4x4 Techno", "03 SOS", "04 Binary 0101",
+  "05 House Offbeat", "06 Acid Pump", "07 Minimal Stab", "08 Tresillo Roll", "09 Drop 5th", "10 Electro Sync",
+  "11 Acid House 88", "12 Music Non Stop", "13 We Are Robots", "14 All Your Base", "15 CQ DX Triptych",
+  "16 Ghost in Shell", "17 Electric Sheep", "18 Therefore I Synth", "19 Sorry Dave (HAL)",
+  "20 No Preset", "21 Plastic Keys", "22 Subterranean", "23 Kosmar Triptych"
+];
+const CONTURA_SCALES_FMT = [
+  "Ionian", "Dorian", "Phrygian", "Mixolyd", "Aeolian", "Pent Maj", "Pent Min", "Blues",
+  "In Sen", "Yo", "Hirajosh", "Bhairav", "Kafi", "Bhupali", "Hijaz", "Bayati", "Rast", "Gamelan", "Hungar", "Folk"
+];
+const LFO_RATE_DIVS_FMT = ["4/1", "2/1", "1/1", "1/2", "1/4", "1/4T", "1/8", "1/8T", "1/16", "1/16T", "1/32"];
+function fmLfoHz100(rate) {
+  if (rate < 1) rate = 1;
+  return Math.floor(((214748 + rate * rate * 4100) * 100000) / 4294967296);
+}
+function fmLfoRateMin(bpm) {
+  let bp = bpm | 0;
+  if (bp < 40) bp = 40;
+  if (bp > 300) bp = 300;
+  const tgt = Math.floor((bp * 40) / 384);
+  let best = 1, err = 1e9;
+  for (let r = 0; r < 128; r++) {
+    const e = Math.abs(fmLfoHz100(r) - tgt);
+    if (e < err) { err = e; best = r; }
+  }
+  return best;
+}
+function formatLfoRate(v) {
+  const bpm = 60 + (ccVal[8] | 0);
+  const FM_LFO_RATE_DEFAULT = 22;
+  const min = fmLfoRateMin(bpm);
+  if (v !== FM_LFO_RATE_DEFAULT && v < min) v = min;
+  const ticks = [384, 192, 96, 48, 24, 16, 12, 8, 6, 4, 3];
+  const hz = fmLfoHz100(v);
+  let best = -1, err = 1e9;
+  if (bpm >= 40 && bpm <= 300) {
+    for (let i = 0; i < 11; i++) {
+      const tgt = Math.floor((bpm * 40) / ticks[i]);
+      if (tgt < 4 || tgt > 1700) continue;
+      const e = Math.abs(hz - tgt);
+      if (e < err) { err = e; best = i; }
+    }
+  }
+  if (best >= 0) {
+    const tgt = Math.floor((bpm * 40) / ticks[best]);
+    const gate = Math.max(6, Math.floor(tgt / 12));
+    const nearer = (rate) => Math.abs(fmLfoHz100(rate) - tgt);
+    if (err <= gate && (v <= min || nearer(v - 1) >= err) && (v === 127 || nearer(v + 1) > err))
+      return LFO_RATE_DIVS_FMT[best];
+  }
+  const t = Math.round(hz / 10);
+  return `${Math.floor(t / 10)}.${t % 10} Hz`;
+}
+function formatVal(i, v) {
+  if (faderDeckCfg()) return String(v);
+  if (i === 1) return RATIOS_FMT[(v >> 4) & 7];
+  if (i === 8) return `${60 + v} BPM`;
+  if (i === 9) return `${50 + Math.round((v * 25) / 127)}%`;
+  if (i === 10) return DIVS_FMT[Math.min(10, Math.floor((v * 11) / 128))];
+  if (i === 11) {
+    const o = Math.max(-2, Math.min(2, Math.floor(v / 26) - 2));
+    return (o < 0 ? "" : "+") + o;
+  }
+  if (i === 12) {
+    const dt = v - 64;
+    return (dt < 0 ? "" : "+") + dt;
+  }
+  if (i === 16) {
+    const ts = (v >> 3) & 15;
+    return paramName(ts);
+  }
+  if (i === 17) return formatLfoRate(v);
+  if (i === 18) return `${Math.round((v * 100) / 127)}%`;
+  if (i === 19) {
+    const SHP = ["Sine", "Tri", "Saw", "Ramp", "Sqr", "S&H", "Walk", "Drunk", "Noise", "Exp"];
+    return SHP[Math.min(9, Math.floor((v * 10) / 128))];
+  }
+  if (engineMode === 0) {
+    if (i === 4) {
+      if (ccVal[6] === 0) {
+        const f = v * 32, z = Math.min(2, Math.floor(f / 1366)), w = f % 1366;
+        return (w < 200 || w > 1166) ? `>T${z + 1} (V7)` : `T${z + 1}`;
+      }
+      return ["Maj3 (+4)", "Min3 (+3)", "4ths (+5)", "Trit (+6)"][(v >> 5) & 3];
+    }
+    if (i === 5) {
+      if (ccVal[6] === 0) return ["Imaj7", "V7", "ii7"][Math.min(2, Math.floor((v * 3) / 128))];
+      return ["Straight", "Rubato", "Sheets", "Free", "Vamp 1", "Vamp 2"][Math.min(5, Math.floor((v * 6) / 128))];
+    }
+    if (i === 6) {
+      if (v === 0) return "AXIS";
+      const d = 1 + Math.floor(((v - 1) * 6) / 127);
+      return `${3 + d}/9`;
+    }
+    if (i === 7) {
+      const vc = ["Triad", "7th", "Drop2", "Quart"][(v >> 5) & 3];
+      const feel = Math.round(((v & 31) / 31) * 100);
+      return `${vc} · ${feel}%`;
+    }
+  } else if (engineMode === 1) {
+    if (i === 4) return CONTURA_SCALES_FMT[Math.min(19, Math.floor((v * 20) / 128))];
+    if (i === 5) {
+      const stp = 3 + Math.floor((v * 25) / 127);
+      const q = stp <= 5 ? "Cell" : stp <= 9 ? "Motif" : stp <= 15 ? "Arch" : stp <= 21 ? "Weave" : "Odyssey";
+      return `${stp} ${q}`;
+    }
+    if (i === 7) {
+      const L = ["Umbra", "Solo", "Duo", "Trio", "Canon", "Warm", "Contra", "Ground", "Air", "Ghost", "Volata", "Hollow"];
+      return L[Math.min(11, Math.floor((v * 12) / 128))];
+    }
+  } else if (engineMode === 2) {
+    if (i === 4) return `+${Math.floor((v * 24) / 127)} st`;
+    if (i === 5) return DITDAH_PRESETS_FMT[Math.min(22, Math.floor((v * 23) / 128))];
+    if (i === 6) return v >= 108 ? "Tight (1u)" : (v >= 80 ? `Club (${v})` : (v < 40 ? `Wide (${v})` : `ITU (${v})`));
+    if (i === 7) {
+      const ac = v - 64;
+      return (ac < 0 ? "" : "+") + ac;
+    }
+  }
+  return String(v);
+}
+function paramName(i) {
+  const cfg = faderDeckCfg();
+  if (cfg) return cfg.names[(i / 4) | 0][i % 4];
+  if (i >= 4 && i <= 7) return ENGINE_LABELS[engineMode][i - 4];
+  return STATIC_NAMES[i];
+}
+function refreshFaderLabels() {
+  document.querySelectorAll(".fader[data-i]").forEach((row) => {
+    const i = +row.dataset.i;
+    const mod = !faderDeckCfg() && i < 16 && lfoDepths[i] > 0 ? "~" : "";
+    row.querySelector("label").textContent = `${mod}${paramName(i)} · CC ${faderCc(i)}`;
+    row.querySelector(".val").textContent = formatVal(i, ccVal[i]);
+  });
+}
+const MODE_MEM_SLOTS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const modeMem = [null, null, null];
+function snapshotMode(m) {
+  if (m < 0 || m > 2) return;
+  modeMem[m] = MODE_MEM_SLOTS.map((i) => ccVal[i]);
+}
+function paintModeFaders() {
+  document.querySelectorAll(".fader[data-i]").forEach((row) => {
+    const i = +row.dataset.i;
+    const inp = row.querySelector("input");
+    if (!inp || i === 11) return;
+    inp.value = ccVal[i];
+  });
+  refreshFaderLabels();
+}
+function applyModePresetUI(m) {
+  const p = MODE_PRESETS[m] || MODE_PRESETS[0];
+  for (let i = 0; i < p.length; i++) ccVal[i] = p[i];
+  paintModeFaders();
+}
+function recallModeUI(m) {
+  if (modeMem[m]) {
+    MODE_MEM_SLOTS.forEach((slot, k) => { ccVal[slot] = modeMem[m][k]; });
+    paintModeFaders();
+  } else {
+    applyModePresetUI(m);
+    snapshotMode(m);
+  }
+}
+const lfoDepths = new Uint8Array(16);
+function buildFaders() {
+  const box = document.getElementById("faders");
+  box.innerHTML = "";
+  const triptych = faderDeckKey() === "triptych";
+  fadersBuiltForDeck = faderDeckKey();
+  for (let b = 0; b < 5; b++) {
+    const card = document.createElement("div");
+    card.className = "fcard";
+    card.innerHTML = `<h3>${faderBankTitle(b)}</h3>`;
+    for (let j = 0; j < 4; j++) {
+      const i = b * 4 + j;
+      const row = document.createElement("div");
+      row.className = "fader";
+      row.dataset.i = i;
+      if (triptych && i === 11) {
+        /* OCTAVE slider: -2 .. +2 discrete octaves, sending CC 23 values 12, 38, 64, 90, 116 */
+        row.innerHTML = `<label></label><span class="val">+0</span><input type="range" min="-2" max="2" step="1" value="0">`;
+        const inp = row.querySelector("input"), val = row.querySelector(".val");
+        inp.addEventListener("input", () => {
+          const oct = +inp.value;
+          const v = (oct + 2) * 26 + 12;
+          ccVal[i] = v;
+          val.textContent = formatVal(i, v);
+          sendMidi(0xB0, faderCc(i), v);
+        });
+      } else {
+        row.innerHTML = `<label></label><span class="val">${formatVal(i, ccVal[i])}</span><input type="range" min="0" max="127" value="${ccVal[i]}">`;
+        const inp = row.querySelector("input"), val = row.querySelector(".val");
+        inp.addEventListener("input", () => {
+          const v = +inp.value;
+          ccVal[i] = v;
+          val.textContent = formatVal(i, v);
+          if (triptych) {
+            if (i === 16) {
+              const ts = (v >> 3) & 15;
+              ccVal[18] = lfoDepths[ts];
+              const dRow = document.querySelector('.fader[data-i="18"]');
+              if (dRow) {
+                dRow.querySelector("input").value = ccVal[18];
+                dRow.querySelector(".val").textContent = formatVal(18, ccVal[18]);
+              }
+            } else if (i === 18) {
+              const ts = (ccVal[16] >> 3) & 15;
+              lfoDepths[ts] = v;
+              refreshFaderLabels();
+            }
+            if (i === 6 && engineMode === 0) refreshFaderLabels();
+          }
+          sendMidi(0xB0, faderCc(i), v);
+        });
+      }
+      card.appendChild(row);
+    }
+    box.appendChild(card);
+  }
+  refreshFaderLabels();
+}
+function rebuildFadersIfDeckChanged() {
+  if (fadersBuiltForDeck === faderDeckKey()) return;
+  const defs = faderDeckCfg()?.def || DEF_VAL;
+  for (let i = 0; i < 20; i++) ccVal[i] = defs[i];
+  buildFaders();
+}
+
+function pulseBtn(bit) {
+  if (!node) return;
+  btnHeldBy.set("pulse" + bit, bit);
+  syncButtons();
+  setTimeout(() => { btnHeldBy.delete("pulse" + bit); syncButtons(); }, 60);
+}
+document.getElementById("dd-bksp").addEventListener("click", () => pulseBtn(BTN.REC));
+document.getElementById("dd-clr").addEventListener("click", () => pulseBtn(BTN.SEQ));
+let lfoResetTimer = null;
+document.getElementById("lfo-rst").addEventListener("click", () => {
+  const btn = document.getElementById("lfo-rst");
+  if (btn.dataset.armed) {
+    clearTimeout(lfoResetTimer);
+    delete btn.dataset.armed;
+    btn.textContent = "⟲ Reset All LFOs (LFO)";
+    pulseBtn(BTN.LFO);
+    lfoDepths.fill(0);
+    ccVal[18] = 0;
+    const dRow = document.querySelector('.fader[data-i="18"]');
+    if (dRow) {
+      dRow.querySelector("input").value = 0;
+      dRow.querySelector(".val").textContent = formatVal(18, 0);
+    }
+    refreshFaderLabels();
+    sendMidi(0xB0, 34, 0);
+  } else {
+    if (!lfoDepths.some((d) => d > 0)) return;
+    btn.dataset.armed = "1";
+    btn.textContent = "Confirm Reset? (LFO = Yes · Esc = No)";
+    pulseBtn(BTN.LFO);
+    setTimeout(() => pulseBtn(BTN.LFO), 80);
+    lfoResetTimer = setTimeout(() => {
+      delete btn.dataset.armed;
+      btn.textContent = "⟲ Reset All LFOs (LFO)";
+    }, 5000);
+  }
+});
+
+document.getElementById("modes").addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-mode]");
+  if (!btn || !node) return;
+  snapshotMode(engineMode);
+  engineMode = +btn.dataset.mode;
+  document.querySelectorAll("#modes button[data-mode]").forEach((x) => x.classList.toggle("on", x === btn));
+  recallModeUI(engineMode);
+  sendMidi(0xB0, 31, engineMode);
+});
+
+let midiAccess = null, midiHandler = null;
+const midiSelect = document.getElementById("midi-in");
+const midiStatus = document.getElementById("midi-status");
+
+function attachMidiInput(id) {
+  if (midiHandler && midiHandler.input) midiHandler.input.onmidimessage = null;
+  midiHandler = null;
+  if (!midiAccess || !id) return;
+  const input = midiAccess.inputs.get(id);
+  if (!input) return;
+  input.onmidimessage = (ev) => {
+    const d = ev.data;
+    if (!d || !d.length) return;
+    const st = d[0];
+    if (d.length === 1) sendMidi(st, 0, 0);
+    else if (d.length === 2) sendMidi(st, d[1], 0);
+    else sendMidi(st, d[1], d[2]);
+  };
+  midiHandler = { input };
+  midiStatus.textContent = input.name || id;
+}
+
+function fillMidiInputs() {
+  const prev = midiSelect.value;
+  midiSelect.innerHTML = '<option value="">— no device —</option>';
+  if (!midiAccess) return;
+  for (const input of midiAccess.inputs.values()) {
+    const o = document.createElement("option");
+    o.value = input.id;
+    o.textContent = input.name || input.id;
+    midiSelect.appendChild(o);
+  }
+  if (prev && midiAccess.inputs.has(prev)) midiSelect.value = prev;
+  else if (midiAccess.inputs.size === 1) {
+    midiSelect.selectedIndex = 1;
+    attachMidiInput(midiSelect.value);
+  }
+}
+
+async function initWebMidi() {
+  if (!navigator.requestMIDIAccess) {
+    midiStatus.textContent = "WebMIDI not supported in this browser.";
+    return;
+  }
+  try {
+    midiAccess = await navigator.requestMIDIAccess({ sysex: false });
+    fillMidiInputs();
+    midiAccess.onstatechange = () => fillMidiInputs();
+    midiStatus.textContent = midiAccess.inputs.size ? `${midiAccess.inputs.size} port(s)` : "No MIDI inputs connected.";
+  } catch (err) {
+    midiStatus.textContent = "MIDI access denied.";
+  }
+}
+midiSelect.addEventListener("change", () => attachMidiInput(midiSelect.value));
+
+const statusEl = document.getElementById("status"), cpuEl = document.getElementById("cpu");
+async function fetchWasm(url, cb) {
+  const r = await fetch(`${url}?v=${cb}`, { cache: "no-store" });
+  if (!r.ok) throw new Error(`${url}: ${r.status}`);
+  return r.arrayBuffer();
+}
+
+const START_TIMEOUT_MS = 45000;
+
+function failStart(go, err) {
+  go.disabled = false;
+  go.textContent = "Switch on";
+  const msg = err && err.message ? err.message : String(err);
+  statusEl.textContent = "Could not start: " + msg;
+  console.error("[fm1-emu switchOn]", err);
+}
+
+async function switchOn() {
+  const go = document.getElementById("go");
+  go.disabled = true;
+  go.textContent = "Starting…";
+  let ac = null;
+  try {
+    const prof = EMU_PROFILES[emuProfile];
+    statusEl.textContent = `Loading ${prof.wasm}…`;
+    ac = new AudioContext({ sampleRate: 44100, latencyHint: "interactive" });
+    const cb = prof.wasmRev ? `${prof.wasmRev}-${Date.now()}` : Date.now();
+    let wasmBuf;
+    try {
+      wasmBuf = await Promise.race([
+        fetchWasm(prof.wasm, cb),
+        new Promise((_, rej) => setTimeout(() => rej(new Error(`timeout loading ${prof.wasm} (server still building?)`)), START_TIMEOUT_MS))
+      ]);
+    } catch (err) {
+      if (prof.wasmFallback) wasmBuf = await fetchWasm(prof.wasmFallback, cb);
+      else throw err;
+    }
+    statusEl.textContent = "Loading audio worklet…";
+    const [wasm] = await Promise.all([
+      Promise.resolve(wasmBuf),
+      ac.audioWorklet.addModule("worklet.js?v=" + cb)
+    ]);
+    node = new AudioWorkletNode(ac, "kosmar-fm1", { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2] });
+    node.connect(ac.destination);
+    const ready = new Promise((res, rej) => {
+      const tm = setTimeout(() => rej(new Error("timeout waiting for WASM boot (see console: worklet.js errors)")), START_TIMEOUT_MS);
+      node.port.onmessage = (e) => {
+        const m = e.data;
+        if (m.type === "ready") { clearTimeout(tm); res(); }
+        else if (m.type === "error") { clearTimeout(tm); rej(new Error(m.step ? `${m.step}: ${m.message}` : m.message)); }
+        else if (m.type === "frame") {
+          if (m.fb) drawScreen(m.fb);
+          drawLights(m.buttons ?? 0, m.keys ?? 0, m.dim ?? 0, m.lfoBtn ?? 0, m.arpBtn ?? 0, m.seqBtn ?? 0, m.recBtn ?? 0);
+          if (m.mode !== undefined && m.mode !== engineMode) {
+            engineMode = m.mode;
+            document.querySelectorAll("#modes button[data-mode]").forEach((x) => {
+              x.classList.toggle("on", +x.dataset.mode === engineMode);
+            });
+            recallModeUI(engineMode);
+          }
+          if (m.load !== undefined) cpuEl.textContent = `FM-1 uses ${m.load}% of this computer’s time`;
+        }
+        else if (m.type === "store" && m.store) saveStore(m.store);
+      };
+    });
+    statusEl.textContent = "Booting emulator…";
+    node.port.postMessage({ type: "load", wasm, store: loadStore(), master }, [wasm]);
+    await ready;
+    await ac.resume();
+    document.getElementById("start").hidden = true;
+    document.getElementById("deck").hidden = false;
+    statusEl.textContent = ac.sampleRate === 44100 ? "On." : `On (the browser runs audio at ${ac.sampleRate} Hz).`;
+    syncButtons(); syncKeys();
+    initWebMidi();
+  } catch (err) {
+    if (node) { try { node.disconnect(); } catch {} node = null; }
+    if (ac) { try { ac.close(); } catch {} }
+    failStart(go, err);
+    statusEl.textContent += " Chrome, Edge, Firefox and Safari should all work.";
+  }
+}
+document.getElementById("go").addEventListener("click", switchOn);
+document.getElementById("reset").addEventListener("click", () => {
+  const btn = document.getElementById("reset");
+  if (btn.dataset.armed) {
+    try { localStorage.removeItem(storeKey()); } catch {}
+    location.reload();
+  } else {
+    btn.dataset.armed = "1";
+    btn.textContent = "Click again to forget everything";
+  }
+});
+
+// init: runs after all top-level declarations above (TDZ-safe)
+applyEmuProfileUI();
+(async () => {
+  const x0Btn = document.querySelector('#emu-pick button[data-emu="x0x"]');
+  const idmBtn = document.querySelector('#emu-pick button[data-emu="idm"]');
+  const scBtn = document.querySelector('#emu-pick button[data-emu="snowcrash"]');
+  const hiphopBtn = document.querySelector('#emu-pick button[data-emu="hiphop"]');
+  const popBtn = document.querySelector('#emu-pick button[data-emu="pop"]');
+  const deckBtn = document.querySelector('#emu-pick button[data-emu="deck"]');
+  const jetBtn = document.querySelector('#emu-pick button[data-emu="jet"]');
+  const bassBtn = document.querySelector('#emu-pick button[data-emu="bass"]');
+  const triphopBtn = document.querySelector('#emu-pick button[data-emu="triphop"]');
+  await markOptionalWasm(x0Btn, "x0x.wasm", "Build x0x.wasm first (not in this folder).");
+  await markOptionalWasm(deckBtn, "fm_deck.wasm", "Build fm_deck.wasm first (./web/emu/build.sh deck-only).");
+  await markOptionalWasm(jetBtn, "fm_jet.wasm", "Build fm_jet.wasm first (./web/emu/build.sh jet-only).");
+  await markOptionalWasm(bassBtn, "fm_bass.wasm", "Build fm_bass.wasm first (./web/emu/build.sh bass-only).");
+  await markOptionalWasm(hiphopBtn, "fm_hiphop.wasm", "Build fm_hiphop.wasm first (./web/emu/build.sh hiphop-only).");
+  await markOptionalWasm(popBtn, "fm_pop.wasm", "Build fm_pop.wasm first (./web/emu/build.sh pop-only).");
+  await markOptionalWasm(idmBtn, "fm_idm.wasm", "Build fm_idm.wasm first (./web/emu/build.sh idm-only).");
+  await markOptionalWasm(scBtn, "fm_snowcrash.wasm", "Build fm_snowcrash.wasm first (./web/emu/build.sh snowcrash-only).");
+  await markOptionalWasm(triphopBtn, "fm_triphop.wasm", "Build fm_triphop.wasm first (./web/emu/build.sh triphop-only).");
+  applyEmuProfileUI();
+  if ((emuProfile === "x0x" && x0Btn.dataset.missing) ||
+      (emuProfile === "hiphop" && hiphopBtn.dataset.missing) ||
+      (emuProfile === "pop" && popBtn.dataset.missing) ||
+      (emuProfile === "idm" && idmBtn.dataset.missing) ||
+      (emuProfile === "snowcrash" && scBtn.dataset.missing) ||
+      (emuProfile === "triphop" && triphopBtn.dataset.missing)) {
+    emuProfile = "triptych";
+    try { localStorage.setItem(EMU_LS, emuProfile); } catch {}
+    applyEmuProfileUI();
+  }
+})();
+</script>
+<script type="module">
+import { Updater } from "./fm1ota.js";
+import { logicalImage, productOf } from "./fm1pkg.js";
+
+const FLASH_PACKAGES = [
+  { id: "rytm", label: "KO RYTM", path: "fw/fm_rytm.fwsc", expect: "FM-1_56421", autoBuild: true },
+  { id: "ctrl", label: "KO CTRL", path: "fw/fm_ctrl.fwsc", expect: "FM-1_56422", autoBuild: true },
+  { id: "dub", label: "KO DUB", path: "fw/fm_dub.fwsc", expect: "FM-1_56401", autoBuild: true },
+  { id: "hiphop", label: "KO HIPHOP", path: "fw/fm_hiphop.fwsc", expect: "FM-1_56406", autoBuild: true },
+  { id: "pop", label: "KO POP", path: "fw/fm_pop.fwsc", expect: "FM-1_56407", autoBuild: true },
+  { id: "funk", label: "KO FUNK", path: "fw/fm_funk.fwsc", expect: "FM-1_56408", autoBuild: true },
+  { id: "house", label: "KO HOUSE", path: "fw/fm_house.fwsc", expect: "FM-1_56402", autoBuild: true },
+  { id: "heavypsych", label: "KO HVYPSY", path: "fw/fm_hvypsy.fwsc", expect: "FM-1_56403", autoBuild: true },
+  { id: "jazz", label: "KO JAZZ", path: "fw/fm_jazz.fwsc", expect: "FM-1_56404", autoBuild: true },
+  { id: "soul", label: "KO SOUL", path: "fw/fm_soul.fwsc", expect: "FM-1_56414", autoBuild: true },
+  { id: "idm", label: "KO IDM", path: "fw/fm_idm.fwsc", expect: "FM-1_56405", autoBuild: true },
+  { id: "snowcrash", label: "KO XCRASH", path: "fw/fm_snowcrash.fwsc", expect: "FM-1_56411", autoBuild: true },
+  { id: "techno", label: "KO TECHNO", path: "fw/fm_techno.fwsc", expect: "FM-1_56409", autoBuild: true },
+  { id: "triphop", label: "KO TRIPHOP", path: "fw/fm_triphop.fwsc", expect: "FM-1_56412", autoBuild: true },
+  { id: "deck", label: "KO KIT", path: "fw/fm_deck.fwsc", expect: "FM-1_56413", autoBuild: true },
+  { id: "jet", label: "KO JET", path: "fw/fm_jet.fwsc", expect: "FM-1_56415", autoBuild: true },
+  { id: "bass", label: "KO BASS", path: "fw/fm_bass.fwsc", expect: "FM-1_56410", autoBuild: true },
+  { id: "triptych", label: "TRIPTYCH", path: "fw/triptych.fwsc", expect: "FM-1_56420", autoBuild: true },
+  { id: "x0x", label: "X0X", path: "fw/x0x.fwsc", expect: "FM-1_900", optionalRepo: true },
+  { id: "sloopdx", label: "sloopDX", path: "fw/sloopdx.fwsc", optionalRepo: true },
+  { id: "felucca", label: "Felucca", path: "fw/felucca.fwsc", optionalRepo: true },
+  { id: "v15", label: "Factory Stock V15", path: "fw/FM-1_V15.fwsc", expect: "FM-1_015", stock: true }
+];
+
+const hwId = document.getElementById("hw-id");
+const hwProg = document.getElementById("hw-progress");
+const flashBox = document.getElementById("hw-flash");
+const packages = new Map();
+let otaAccess = null;
+let writing = false;
+let pollTimer = null;
+
+function setProgress(html) { hwProg.innerHTML = html; }
+
+function stepLine(phase, pct) {
+  const phases = ["Checking package", "Switching to loader", "Writing", "Rebooting"];
+  let idx = 0;
+  if (phase === "loader") idx = 1;
+  else if (phase === "write") idx = 2;
+  else if (phase === "reboot" || phase === "done") idx = 3;
+  const trail = phases.map((p, i) => (i === idx ? `<strong>${p}</strong>` : p)).join(" → ");
+  let bar = "";
+  if (phase === "write" && pct != null) {
+    bar = `<progress max="100" value="${Math.floor(pct)}"></progress>`;
+  }
+  setProgress(`${trail}${phase === "write" && pct != null ? ` (${Math.floor(pct)}%)` : ""}${bar ? `<br>${bar}` : ""}`);
+}
+
+async function checkPackageExists(meta) {
+  await window.loadEmuInventory();
+  if (meta.optionalRepo || meta.stock) return window.inventoryHasFw(meta.path);
+  if (window.inventoryHasFw(meta.path)) return true;
+  try {
+    const r = await fetch(meta.path, { method: "HEAD", cache: "no-store" });
+    return r.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function loadPackage(meta) {
+  try {
+    const r = await fetch(`${meta.path}?t=${Date.now()}`, { cache: "no-store" });
+    if (!r.ok) return null;
+    const pkg = new Uint8Array(await r.arrayBuffer());
+    const product = productOf(pkg);
+    if (meta.expect && product !== meta.expect) {
+      console.warn(meta.path, "identity", product, "expected", meta.expect);
+    }
+    return { image: logicalImage(pkg), product, label: meta.label };
+  } catch {
+    return null;
+  }
+}
+
+function makeFlashButtons() {
+  flashBox.innerHTML = "";
+  for (const meta of FLASH_PACKAGES) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = meta.label;
+    btn.dataset.pkg = meta.id;
+    btn.disabled = true;
+    if (meta.optionalRepo) btn.title = "Add build/emu/fw/" + meta.path.split("/").pop() + " locally (repo not cloned by build.sh).";
+    flashBox.appendChild(btn);
+    btn.addEventListener("click", async () => {
+      if (writing) return;
+      btn.classList.add("busy");
+      setProgress(meta.autoBuild ? `Building / loading latest ${meta.label}\u2026` : `Loading ${meta.label}\u2026`);
+      const fresh = await loadPackage(meta);
+      btn.classList.remove("busy");
+      if (!fresh) {
+        setProgress(`Build or fetch failed for ${meta.label}.`);
+        return;
+      }
+      packages.set(meta.id, fresh);
+      setProgress("");
+      runFlash(fresh, meta.stock);
+    });
+  }
+}
+
+async function refreshPackages() {
+  await window.loadEmuInventory();
+  await Promise.all(FLASH_PACKAGES.map(async (meta) => {
+    const exists = meta.autoBuild ? true : await checkPackageExists(meta);
+    const btn = flashBox.querySelector(`button[data-pkg="${meta.id}"]`);
+    if (btn) {
+      btn.disabled = !exists || writing;
+      if (exists) btn.title = meta.expect || meta.label;
+      else if (!meta.optionalRepo) btn.title = "Missing " + meta.path;
+    }
+  }));
+}
+
+async function ensureOtaAccess() {
+  if (!navigator.requestMIDIAccess) {
+    hwId.textContent = "WebMIDI not available — use Chrome or Edge.";
+    hwId.className = "fw-id muted";
+    return null;
+  }
+  try {
+    otaAccess = await navigator.requestMIDIAccess({ sysex: true });
+    otaAccess.onstatechange = () => pollHardware();
+    return otaAccess;
+  } catch {
+    hwId.textContent = "SysEx MIDI blocked — allow MIDI in the site settings.";
+    hwId.className = "fw-id muted";
+    return null;
+  }
+}
+
+async function pollHardware() {
+  if (!otaAccess || writing) return;
+  const up = new Updater(otaAccess);
+  const dev = await up.find(() => true);
+  if (dev) {
+    hwId.textContent = `Connected: ${dev.id.text}`;
+    hwId.className = "fw-id";
+    dev.link.close();
+  } else {
+    hwId.textContent = "No FM-1 detected — connect USB (Chrome / Edge, SysEx).";
+    hwId.className = "fw-id muted";
+  }
+}
+
+async function runFlash(pkg, isStock) {
+  if (!pkg || writing) return;
+  const access = otaAccess || await ensureOtaAccess();
+  if (!access) return;
+  if (!confirm(`Flash ${pkg.label} (${pkg.product}) to the connected FM-1?\nDon\u2019t unplug USB while writing.`)) return;
+  writing = true;
+  flashBox.querySelectorAll("button").forEach((b) => { b.disabled = true; b.classList.add("busy"); });
+  const total = 74 + 1167;
+  const step = (k, a) => {
+    if (k === "start" || k === "verify") stepLine("verify", k === "verify" ? (a / total) * 100 : null);
+    if (k === "loader") stepLine("loader");
+    if (k === "write") stepLine("write", ((74 + a) / total) * 100);
+    if (k === "reboot") stepLine("reboot");
+    if (k === "done") {
+      stepLine("done", 100);
+      hwId.textContent = `Connected: ${a}`;
+      hwId.className = "fw-id";
+    }
+  };
+  try {
+    const up = new Updater(access);
+    const ota = await up.find((id) => /^ota-/i.test(id.model));
+    if (ota) {
+      ota.link.close();
+      if (!(await up.resume(pkg.image, step))) throw Object.assign(new Error("stopped"), { code: "stopped" });
+    } else {
+      await up.install(pkg.image, pkg.product, step);
+    }
+    if (isStock) setProgress("<strong>Done.</strong> Factory stock firmware is running.");
+    else setProgress(`<strong>Done.</strong> ${pkg.label} (${pkg.product}) installed.`);
+  } catch (e) {
+    const msg = e && e.message ? e.message : String(e);
+    setProgress(`Flash failed: ${msg}`);
+  }
+  writing = false;
+  flashBox.querySelectorAll("button").forEach((b) => b.classList.remove("busy"));
+  await refreshPackages();
+  pollHardware();
+}
+
+document.getElementById("fw-drop").addEventListener("change", async (e) => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!f) return;
+  try {
+    const raw = new Uint8Array(await f.arrayBuffer());
+    const product = productOf(raw);
+    const pkg = { image: logicalImage(raw), product, label: f.name };
+    await runFlash(pkg, false);
+  } catch (err) {
+    setProgress(`Couldn’t read package: ${err && err.message || err}`);
+  }
+});
+
+window.addEventListener("beforeunload", (e) => {
+  if (writing) { e.preventDefault(); e.returnValue = "Firmware write in progress\u2026"; }
+});
+
+makeFlashButtons();
+refreshPackages().then(async () => {
+  await ensureOtaAccess();
+  pollHardware();
+  pollTimer = setInterval(pollHardware, 4000);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+# KO JET: REPLACE take, UNDO, step overlay (MICRO, PITCH), mod wheel routes. 98 BPM: 153 ms a step.
+# Buttons: 5 LFO, 6 EDIT, 11 SEQ, 12 PLAY, 13 REC. Keys: bit k = MIDI 53 + k.
+#
+# expect: 3060-3140:F4,4300-5400:<300,
+# expect: 8520-8600:C4,8985-9060:D#4,
+# expect: 13850-13910:F4,
+# expect: 16300-16700:C4,17300-17900:vib,19300-19700:<4000
+
+# SEQ view, REC page (SEQ again), knob 1 MODE -> REPLACE, back to the SEQ page
+0 btn 11
+100 btn 11
+200 enc 0 1
+300 btn 11
+
+# step record in REPLACE: the first note wipes the factory riff, F4 lands on step 1
+400 btn 13
+500 keys 0x1000
+600 keys 0
+700 btn 13
+800 shot
+3000 btn 12
+5440 btn 12
+
+# EDIT + REC while stopped = UNDO: the riff is back (C4 on step 4, D#4 on step 7)
+5600 press 6
+5700 btn 13
+5800 release 6
+5900 shot
+8000 btn 12
+10440 btn 12
+
+# hold step 7 (white key 7 = bit 11): step overlay. Knob 3 MICRO -5 ticks (early), knob 4 PITCH +2 (D#4 -> F4)
+11000 keys 0x800
+11600 keys 0
+11700 enc 2 -5
+11900 enc 3 1
+12100 enc 3 1
+12300 shot
+# step 7 would start at 13918; five ticks early it is already there at 13791
+13000 btn 12
+14200 btn 12
+
+# EXPR page (LFO bank, page 3): CC 14..17 set the four knobs. A held MIDI note, wheel up:
+# MW>VIB at full = vibrato, then MW>LPF at minimum = the wheel closes the filter
+15000 btn 5
+15100 btn 5
+15200 btn 5
+15300 shot
+16000 midi 0x90 60 100
+17000 midi 0xB0 16 127
+17050 midi 0xB0 1 127
+18000 midi 0xB0 16 64
+18050 midi 0xB0 15 0
+18100 shot
+19800 midi 0x80 60 0
+20500 end

@@ -1,0 +1,25 @@
+# KO CTRL host simulation — keys, panel buttons, incoming MIDI (tests/host.c + ctrl.c)
+# Buttons: ENV=4, SEL=3, LFO=5, ARP=10, SEQ=11, REC=13, HOME=8, PLAY=12, SAVE=9
+
+100 btn 8
+400 btn 4
+700 btn 3
+1000 btn 5
+1300 btn 10
+1600 btn 11
+1900 btn 13
+2200 btn 12
+2500 btn 9
+2800 keys 0x80
+2900 keys 0x480
+3000 keys 0x10000
+3100 keys 0
+3200 midi 0xB0 74 96
+3400 midi 0xB0 71 110
+3600 midi 0xB0 1 127
+3800 midi 0x90 60 100
+4000 midi 0x80 60 0
+4200 midi 0xFA 0 0
+4400 midi 0xF8 0 0
+4600 midi 0xFC 0 0
+4800 end

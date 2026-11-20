@@ -1,0 +1,58 @@
+# KO JET host smoke — banks, encoders, MIDI, REC (platform.c BTN_*)
+# cc -O2 -DDINGHY_HOST -Ifirmware/src -Ifirmware/gen -o build/host/jet firmware/src/jet.c
+
+400 shot
+50 btn 12
+200 keys 0x80
+480 keys 0
+600 btn 8
+900 shot
+900 keys 0x1
+980 keys 0
+1200 btn 4
+1500 shot
+1500 enc 0 3
+1600 enc 1 -2
+1700 enc 2 5
+1800 enc 3 -1
+2000 btn 3
+2300 shot
+2300 encid 1 2
+2500 encid 6 1
+2700 keys 0x400
+2750 keys 0
+3000 btn 7
+3300 shot
+3200 enc 0 2
+3400 btn 2
+3700 shot
+3800 btn 5
+4100 btn 11
+4400 keys 0x1000
+4480 keys 0
+4600 midi 0x90 48 100
+5200 midi 0x80 48 0
+5400 midi 0xB0 2 100
+5600 midi 0xB0 20 90
+5800 midi 0xE0 0 64
+5900 midi 0xE0 0 0
+6000 btn 13
+6200 keys 0x80
+6400 keys 0
+6600 btn 12
+6800 press 12
+7200 release 12
+7400 btn 8
+7600 shot
+7600 encid 1 -1
+7800 encid 6 3
+8000 midi 0x90 60 110
+8200 midi 0x80 60 0
+8500 btn 9
+8800 btn 4
+9100 shot
+9200 btn 3
+9500 btn 2
+9800 keys 0x2000000
+9880 keys 0
+10000 end

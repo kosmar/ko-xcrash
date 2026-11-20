@@ -1,0 +1,3 @@
+# After reload: CONTURA must restore scale from mode_mem
+300 encid 1 1
+600 end

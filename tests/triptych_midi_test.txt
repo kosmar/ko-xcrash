@@ -1,0 +1,12 @@
+# CYCLIC chord ~2s, PLAY off/on, CONTURA, DIT DAH — see triptych-plan S1
+0 keys 18560
+100 btn 12
+2000 keys 0
+2050 btn 12
+2100 btn 12
+2200 midi 176 31 1
+2250 midi 176 18 96
+2260 midi 176 19 110
+6200 midi 176 31 2
+9200 btn 12
+9300 end

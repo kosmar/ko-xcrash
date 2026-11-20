@@ -1,0 +1,5 @@
+# HOUSE FILL: hold morph, release before end, no 1-bar latch, restore at downbeat
+50 btn 12
+100 keys 0x20000
+2500 keys 0
+7000 end

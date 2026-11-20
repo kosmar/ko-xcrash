@@ -1,0 +1,14 @@
+# Tap ENV / SEL / GLO / FX / LFO twice each (BTN_* from platform.c).
+0 keys 0
+80 btn 4
+200 btn 4
+320 btn 3
+440 btn 3
+560 btn 7
+680 btn 7
+800 btn 2
+920 btn 2
+1040 btn 5
+1160 btn 5
+1250 btn 12
+2200 end

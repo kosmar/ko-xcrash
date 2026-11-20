@@ -1,0 +1,4 @@
+# FX short tap: press/release under 500 ms (BTN_FX = 2). Longpress DJ toggle needs press/hold — manual.
+0 press 2
+120 release 2
+400 end
